@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Landingpage = () => {
+  const navigate=useNavigate()
   return (
     <div className="bg-background-light font-manrope text-slate-900 min-h-screen">
       {/* Main Wrapper */}
@@ -8,7 +10,7 @@ const Landingpage = () => {
         {/* Header / Navigation */}
         <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-background-light/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
-            <div className="flex items-center gap-2 text-primary">
+            <div className="f   lex items-center gap-2 text-primary">
               <span className="material-symbols-outlined text-3xl font-bold">
                 medical_services
               </span>
@@ -200,7 +202,7 @@ const Landingpage = () => {
                       healthcare providers securely.
                     </p>
                   </div>
-                  <button className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg py-3 font-bold text-primary group-hover:bg-primary/10 transition-colors">
+                  <button onClick={() => navigate("/patient-signup")}  className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg py-3 font-bold text-primary group-hover:bg-primary/10 transition-colors">
                     Register / Login{" "}
                     <span className="material-symbols-outlined">
                       arrow_forward

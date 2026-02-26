@@ -3,7 +3,8 @@ const db = require("./database/mongodb");
 const cookieParser = require("cookie-parser");
 const app = express();
 const port = 3000;
-
+const cors=require("cors");
+const user_router = require("./routes/user_routes");
 app.use(express.json());
 app.use(cookieParser())
 app.use(cors({
@@ -11,6 +12,7 @@ app.use(cors({
     credentials: true
 }));
 
+app.use("/api/auth",user_router)
 
 app.listen(port, () => {
     db()
