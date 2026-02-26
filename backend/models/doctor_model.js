@@ -54,6 +54,10 @@ const doctorSchema = new mongoose.Schema({
         required: true,
         enum: ["Active", "Inactive"],
         default: "Active"
+    },
+    hospitalId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hospital"
     }
 }, { timestamps: true });
 
