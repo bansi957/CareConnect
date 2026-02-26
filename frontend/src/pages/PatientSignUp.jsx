@@ -1,6 +1,61 @@
-import React from "react";
-
+import React, { useState } from "react";
+import axios from "axios";
+import { serverUrl } from "../App";
 const PatientSignUp = () => {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Form Data Submitted:", formData);
+    // Add API call logic here
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/auth/patient-signup`,
+        formData,
+        { withCredentials: true },
+      );
+      console.log(result);
+      alert("Sign up successful!");
+      // Optionally redirect user here
+    } catch (error) {
+      console.log(error);
+      alert(
+        error.response?.data?.message || "Sign up failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-background-light text-slate-900 antialiased min-h-screen font-manrope">
       <div className="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
@@ -109,7 +164,7 @@ const PatientSignUp = () => {
                 </p>
               </div>
 
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 {/* Full Name */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -122,6 +177,10 @@ const PatientSignUp = () => {
                     className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
                     placeholder="John Doe"
                     type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
 
@@ -137,6 +196,10 @@ const PatientSignUp = () => {
                     className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
                     placeholder="john@example.com"
                     type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
 
@@ -150,9 +213,86 @@ const PatientSignUp = () => {
                   </label>
                   <input
                     className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 00000 00000"
                     type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
                   />
+                </div>
+
+                {/* Address */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-slate-400 text-lg">
+                      home
+                    </span>
+                    Residential Address
+                  </label>
+                  <textarea
+                    className="w-full h-24 p-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none resize-none"
+                    placeholder="Enter your full address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                  ></textarea>
+                </div>
+
+                {/* City, State, Pincode Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-slate-400 text-lg">
+                        location_city
+                      </span>
+                      City
+                    </label>
+                    <input
+                      className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                      placeholder="City"
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-slate-400 text-lg">
+                        map
+                      </span>
+                      State
+                    </label>
+                    <input
+                      className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                      placeholder="State"
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-slate-400 text-lg">
+                        pin_drop
+                      </span>
+                      Pincode
+                    </label>
+                    <input
+                      className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                      placeholder="123456"
+                      type="text"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* Password Fields Row */}
@@ -164,11 +304,26 @@ const PatientSignUp = () => {
                       </span>
                       Password
                     </label>
-                    <input
-                      className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-                      placeholder="••••••••"
-                      type="password"
-                    />
+                    <div className="relative">
+                      <input
+                        className="w-full h-12 px-4 pr-12 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        placeholder="••••••••"
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                      >
+                        <span className="material-symbols-outlined text-xl">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -177,11 +332,30 @@ const PatientSignUp = () => {
                       </span>
                       Confirm
                     </label>
-                    <input
-                      className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-                      placeholder="••••••••"
-                      type="password"
-                    />
+                    <div className="relative">
+                      <input
+                        className="w-full h-12 px-4 pr-12 rounded-lg border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                        placeholder="••••••••"
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                      >
+                        <span className="material-symbols-outlined text-xl">
+                          {showConfirmPassword
+                            ? "visibility_off"
+                            : "visibility"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -191,6 +365,8 @@ const PatientSignUp = () => {
                     className="mt-1 size-4 rounded border-slate-300 text-primary focus:ring-primary bg-white"
                     id="terms"
                     type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
                   />
                   <label className="text-sm text-slate-500" htmlFor="terms">
                     I agree to the{" "}
@@ -213,13 +389,46 @@ const PatientSignUp = () => {
 
                 {/* Submit Button */}
                 <button
-                  className="w-full h-12 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.01] active:scale-[0.99]"
+                  className={`w-full h-12 flex items-center justify-center gap-2 font-bold rounded-lg shadow-lg transition-all transform ${
+                    loading || !termsAccepted
+                      ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
+                      : "bg-primary hover:bg-primary/90 text-white shadow-primary/20 hover:scale-[1.01] active:scale-[0.99]"
+                  }`}
                   type="submit"
+                  disabled={loading || !termsAccepted}
                 >
-                  Create Account
-                  <span className="material-symbols-outlined">
-                    arrow_forward
-                  </span>
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Creating Account...
+                    </div>
+                  ) : (
+                    <>
+                      Create Account
+                      <span className="material-symbols-outlined">
+                        arrow_forward
+                      </span>
+                    </>
+                  )}
                 </button>
 
                 <div className="relative py-4">
