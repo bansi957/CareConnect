@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { serverUrl } from "../App";
+import AuthHeader from "../components/AuthHeader";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/UserSlice";
 const PatientSignUp = () => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -44,7 +48,7 @@ const PatientSignUp = () => {
         { withCredentials: true },
       );
       console.log(result);
-      alert("Sign up successful!");
+      dispatch(setUserData(result.data.user));
       // Optionally redirect user here
     } catch (error) {
       console.log(error);
@@ -59,46 +63,7 @@ const PatientSignUp = () => {
   return (
     <div className="bg-background-light text-slate-900 antialiased min-h-screen font-manrope">
       <div className="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-        {/* Navigation Header */}
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 bg-white px-6 py-4 md:px-20 lg:px-40 transition-colors">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-10 rounded-lg bg-primary text-white">
-              <span className="material-symbols-outlined">
-                health_and_safety
-              </span>
-            </div>
-            <h2 className="text-slate-900 text-xl font-extrabold tracking-tight">
-              CareConnect
-            </h2>
-          </div>
-          <div className="flex flex-1 justify-end gap-6 items-center">
-            <nav className="hidden md:flex items-center gap-8">
-              <a
-                className="text-slate-600 text-sm font-semibold hover:text-primary transition-colors"
-                href="#"
-              >
-                Home
-              </a>
-              <a
-                className="text-slate-600 text-sm font-semibold hover:text-primary transition-colors"
-                href="#"
-              >
-                Find Doctors
-              </a>
-              <a
-                className="text-slate-600 text-sm font-semibold hover:text-primary transition-colors"
-                href="#"
-              >
-                Services
-              </a>
-            </nav>
-            <div className="flex gap-3">
-              <button className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 text-slate-700 text-sm font-bold hover:bg-slate-100 transition-all">
-                Login
-              </button>
-            </div>
-          </div>
-        </header>
+        <AuthHeader />
 
         {/* Main Content Section: Split Screen */}
         <main className="flex-1 flex flex-col md:flex-row">
@@ -496,7 +461,7 @@ const PatientSignUp = () => {
                   Already have an account?{" "}
                   <a
                     className="text-primary font-bold hover:underline"
-                    href="#"
+                    href="/signin"
                   >
                     Log in
                   </a>

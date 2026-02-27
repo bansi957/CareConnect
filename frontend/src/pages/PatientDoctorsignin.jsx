@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { serverUrl } from "../App";
+import AuthHeader from "../components/AuthHeader";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/UserSlice";
 
 const PatientDoctorsignin = () => {
-  const [role, setRole] = useState("patient"); // 'patient' or 'doctor'
+  const dispatch = useDispatch(); 
+  const location = useLocation();
+  const [role, setRole] = useState(location.state?.role || "patient"); // 'patient' or 'doctor'
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -34,9 +39,7 @@ const PatientDoctorsignin = () => {
         withCredentials: true,
       });
       console.log(`${role} login successful:`, result.data);
-      alert(
-        `${role.charAt(0).toUpperCase() + role.slice(1)} login successful!`,
-      );
+      dispatch(setUserData(result.data.user));
       // Redirect logic here
     } catch (error) {
       console.error("Login failed:", error);
@@ -49,37 +52,7 @@ const PatientDoctorsignin = () => {
   return (
     <div className="bg-background-light text-slate-900 antialiased min-h-screen font-manrope">
       <div className="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-        {/* Navigation Header */}
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 bg-white px-6 py-4 md:px-20 lg:px-40 transition-colors">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-10 rounded-lg bg-primary text-white">
-              <span className="material-symbols-outlined">
-                health_and_safety
-              </span>
-            </div>
-            <h2 className="text-slate-900 text-xl font-extrabold tracking-tight">
-              CareConnect
-            </h2>
-          </div>
-          <div className="flex flex-1 justify-end gap-6 items-center">
-            <nav className="hidden md:flex items-center gap-8">
-              <Link
-                to="/"
-                className="text-slate-600 text-sm font-semibold hover:text-primary transition-colors"
-              >
-                Home
-              </Link>
-            </nav>
-            <div className="flex gap-3">
-              <Link
-                to="/patient-signup"
-                className="flex items-center justify-center rounded-lg h-10 px-4 text-slate-700 text-sm font-bold hover:bg-slate-100 transition-all"
-              >
-                Sign Up
-              </Link>
-            </div>
-          </div>
-        </header>
+        <AuthHeader />
 
         {/* Main Content Section */}
         <main className="flex-1 flex flex-col md:flex-row">
@@ -201,7 +174,6 @@ const PatientDoctorsignin = () => {
                   </div>
                 </div>
 
-            
                 {/* Submit Button */}
                 <button
                   className={`w-full h-12 flex items-center justify-center gap-2 font-bold rounded-lg shadow-lg transition-all transform ${

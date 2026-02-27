@@ -8,7 +8,8 @@ const userSchema=new mongoose.Schema({
     address:{type:String,required:true},
     city:{type:String,required:true},
     state:{type:String,required:true},
-    pincode:{type:String,required:true},    
+    pincode:{type:String,required:true},
+    role:{type:String,default:"patient"}    
 })
 
 module.exports=mongoose.model("User",userSchema)

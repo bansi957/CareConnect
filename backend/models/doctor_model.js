@@ -58,6 +58,10 @@ const doctorSchema = new mongoose.Schema({
     hospitalId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Hospital"
+    },
+    role:{
+        type:String,
+        default:"doctor"
     }
 }, { timestamps: true });
 
