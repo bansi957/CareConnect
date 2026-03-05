@@ -4,6 +4,7 @@ import axios from "axios";
 import AuthHeader from "../components/AuthHeader";
 import { setHospitalData } from "../redux/HospitalSlice";
 import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/UserSlice";
 
 // Defined OUTSIDE the parent component so React never treats it as a new
 // component type on re-renders — that would cause inputs to lose focus after
@@ -99,7 +100,8 @@ const HospitalSignUp = () => {
           { withCredentials: true },
         );
         console.log(response.data);
-        dispatch(setHospitalData(response.data.data));
+        dispatch(setUserData(response.data.data))
+        // dispatch(setHospitalData(response.data.data));
         if (response.status === 200) {
           setSuccess("Signed in successfully! Redirecting...");
           setTimeout(() => navigate("/hospital-dashboard"), 1500);
@@ -111,7 +113,7 @@ const HospitalSignUp = () => {
           formData,
           { withCredentials: true },
         );
-        dispatch(setHospitalData(response.data.hospital));
+        dispatch(setUserData(response.data.hospital));
         if (response.status === 201) {
           setSuccess("Hospital account created successfully!");
           setTimeout(() => navigate("/hospital-dashboard"), 1500);

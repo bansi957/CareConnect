@@ -13,10 +13,12 @@ import PatientsAppointment from "./pages/PatientsAppointment";
 import BookAppointment from "./pages/BookAppointment";
 import PatientProfile from "./pages/PatientProfile";
 import HospitalDashboard from "./pages/HospitalDashboard";
+import useGetCurrentHospital from "./hooks/useGetCurrentHospital";
 export const serverUrl = "http://localhost:3000";
 
 function App() {
   useGetCurrentPatient();
+  useGetCurrentHospital();
   const { userData } = useSelector((state) => state.user);
   return (
     <>
@@ -61,10 +63,7 @@ function App() {
           path="/patient-profile"
           element={!userData ? <Navigate to="/" /> : <PatientProfile />}
         />
-        <Route
-          path="/hospital-dashboard"
-          element={<HospitalDashboard />}
-        />
+   
       </Routes>
     </>
   );

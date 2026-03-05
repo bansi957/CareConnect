@@ -93,4 +93,17 @@ const hospitalUpdate = async (req, res) => {
     }
 }
 
-module.exports = { hospitalSignUp, hospitalSignIn, hospitalSignOut, hospitalUpdate }
+const getHospitalById = async (req, res) => {
+    try {
+        const hospital = await Hospital.findById(req.userId).select("-password")
+        if (!hospital) {
+            return res.status(404).json({ message: "Hospital not found" })
+        }
+        return res.status(200).json({ message: "Hospital found successfully", data: hospital })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal server error" })
+    }
+}
+
+module.exports = { hospitalSignUp, hospitalSignIn, hospitalSignOut, hospitalUpdate, getHospitalById }

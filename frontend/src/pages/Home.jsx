@@ -1,6 +1,7 @@
 import React from 'react'
 import PatientHome from '../components/PatientHome'
 import { useSelector } from 'react-redux'
+import HospitalDashboard from './HospitalDashboard'
 
 function Home() {
     const {userData}=useSelector((state)=>state.user)
@@ -8,8 +9,8 @@ function Home() {
   return (
     <>
     {userData?.role=="patient" && <PatientHome/>}
-    {/* {userData?.role=="Doctor" && <DoctorHome/>}
-    {userData?.role=="Hospital" && <HospitalHome/>} */}
+    {userData?.role=="doctor" && <DoctorHome/>}
+    {userData?.role=="hospital" && <HospitalDashboard/>}
     </>
   )
 }
