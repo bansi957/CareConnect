@@ -15,7 +15,7 @@ app.use(cors({
 }));
 
 app.use("/api/auth", user_router)
-app.use("/api/auth", doctor_router)
+app.use("/api/doctor", doctor_router)
 app.use("/api/hospital", hospital_router);
 
 app.listen(port, () => {

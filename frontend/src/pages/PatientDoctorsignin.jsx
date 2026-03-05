@@ -32,7 +32,7 @@ const PatientDoctorsignin = () => {
     const endpoint =
       role === "patient"
         ? `${serverUrl}/api/auth/patient-signin`
-        : `${serverUrl}/api/auth/doctor-signin`;
+        : `${serverUrl}/api/doctor/doctor-signin`;
 
     try {
       const result = await axios.post(endpoint, formData, {

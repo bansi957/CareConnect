@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuthHeader from "../components/AuthHeader";
-import { setHospitalData } from "../redux/HospitalSlice";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/UserSlice";
 
@@ -104,7 +103,7 @@ const HospitalSignUp = () => {
         // dispatch(setHospitalData(response.data.data));
         if (response.status === 200) {
           setSuccess("Signed in successfully! Redirecting...");
-          setTimeout(() => navigate("/hospital-dashboard"), 1500);
+          // setTimeout(() => navigate("/hospital-dashboard"), 1500);
         }
       } else {
         // Sign Up: send full form
@@ -116,7 +115,7 @@ const HospitalSignUp = () => {
         dispatch(setUserData(response.data.hospital));
         if (response.status === 201) {
           setSuccess("Hospital account created successfully!");
-          setTimeout(() => navigate("/hospital-dashboard"), 1500);
+          // setTimeout(() => navigate("/hospital-dashboard"), 1500);
         }
       }
     } catch (err) {

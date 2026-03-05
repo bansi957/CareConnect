@@ -60,35 +60,95 @@ const patientLogin = async (req, res) => {
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ message: "User logged in successfully",user });
+    return res
+      .status(200)
+      .json({ message: "User logged in successfully", user });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-
-const patientLogout=async(req,res)=>{
+const patientLogout = async (req, res) => {
   try {
-    res.clearCookie("token")
-    return res.status(200).json({message:"User logged out successfully"})
+    res.clearCookie("token");
+    return res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({message:"Internal server error"})
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
-const getCurrentPatient=async(req,res)=>{
-    try {
-        const user=await User.findById(req.userId)
-        if(!user){
-            return res.status(404).json({message:"User not found"})
-        }
-        return res.status(200).json({message:"User found successfully",user})
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({message:"Internal server error"})
+const getCurrentPatient = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-}
+    return res.status(200).json({ message: "User found successfully", user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-module.exports = { patientSignup, patientLogin,patientLogout,getCurrentPatient };
+const updateProfile = async (req, res) => {
+  try {
+    const {
+      fullName,
+      phone,
+      address,
+      city,
+      state,
+      pincode,
+      bloodGroup,
+      age,
+      weight,
+      height,
+      hasSugar,
+      sugarDetails,
+      hasBP,
+      bpDetails,
+    } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        fullName,
+        phone,
+        address,
+        city,
+        state,
+        pincode,
+        bloodGroup,
+        age,
+        weight,
+        height,
+        hasSugar,
+        sugarDetails,
+        hasBP,
+        bpDetails,
+      },
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = {
+  patientSignup,
+  patientLogin,
+  patientLogout,
+  getCurrentPatient,
+  updateProfile,
+};

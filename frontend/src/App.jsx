@@ -14,6 +14,8 @@ import BookAppointment from "./pages/BookAppointment";
 import PatientProfile from "./pages/PatientProfile";
 import HospitalDashboard from "./pages/HospitalDashboard";
 import useGetCurrentHospital from "./hooks/useGetCurrentHospital";
+import AboutUs from "./pages/AboutUs";
+import Solutions from "./pages/Solutions";
 export const serverUrl = "http://localhost:3000";
 
 function App() {
@@ -63,7 +65,8 @@ function App() {
           path="/patient-profile"
           element={!userData ? <Navigate to="/" /> : <PatientProfile />}
         />
-   
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/solutions" element={<Solutions />} />
       </Routes>
     </>
   );

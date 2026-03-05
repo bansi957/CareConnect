@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { setHospitalData } from "../redux/HospitalSlice";
+import { useDispatch, useSelector } from "react-redux";
+import HospitalProfileView from "./HospitalProfile";
+import AddDoctor from "./AddDoctor";
 import axios from "axios";
+import { setUserData } from "../redux/UserSlice";
 
 // ─── Static doctor data ─────────────────────────────────────────────────────────
 const doctors = [
@@ -341,216 +343,20 @@ function FormField({ label, id, type = "text", value, onChange, placeholder, ico
     );
 }
 
-// ─── Hospital Profile View ──────────────────────────────────────────────────────
-function HospitalProfileView({ hospital, dispatch }) {
-    // separate state variable for each hospital model field
-    const [name, setName] = useState(hospital?.name ?? "");
-    const [mobile, setMobile] = useState(hospital?.mobile ?? "");
-    const [address, setAddress] = useState(hospital?.address ?? "");
-    const [city, setCity] = useState(hospital?.city ?? "");
-    const [state, setState] = useState(hospital?.state ?? "");
-    const [pincode, setPincode] = useState(hospital?.pincode ?? "");
-    const [hospitalCategory, setHospitalCategory] = useState(hospital?.hospitalCategory ?? "");
-    const [registrationNumber, setRegistrationNumber] = useState(hospital?.registrationNumber ?? "");
-    const [noOfDoctors, setNoOfDoctors] = useState(hospital?.noOfDoctors ?? "");
-    const [totalBeds, setTotalBeds] = useState(hospital?.totalBeds ?? "");
-    const [availableBeds, setAvailableBeds] = useState(hospital?.availableBeds ?? "");
-    const [totalPatients, setTotalPatients] = useState(hospital?.totalPatients ?? "");
-    const [availablePatients, setAvailablePatients] = useState(hospital?.availablePatients ?? "");
-    const [workingHours, setWorkingHours] = useState(hospital?.workingHours ?? "");
-    const [status, setStatus] = useState(hospital?.status ?? "");
-    const [image, setImage] = useState(hospital?.image ?? "");
 
-    const [saving, setSaving] = useState(false);
-    const [toast, setToast] = useState(null);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        setToast(null);
-        try {
-            const res = await axios.put(
-                "http://localhost:3000/api/hospital/hospital-update",
-                { name, mobile, address, city, state, pincode, hospitalCategory, registrationNumber, noOfDoctors, totalBeds, availableBeds, totalPatients, availablePatients, workingHours, status, image },
-                { withCredentials: true }
-            );
-            dispatch(setHospitalData(res.data.data));
-            setToast({ type: "success", msg: "Profile saved successfully!" });
-        } catch (err) {
-            setToast({ type: "error", msg: err?.response?.data?.message ?? "Update failed. Try again." });
-        } finally {
-            setSaving(false);
-            setTimeout(() => setToast(null), 4000);
-        }
-    };
-
-    const handleReset = () => {
-        setName(hospital?.name ?? "");
-        setMobile(hospital?.mobile ?? "");
-        setAddress(hospital?.address ?? "");
-        setCity(hospital?.city ?? "");
-        setState(hospital?.state ?? "");
-        setPincode(hospital?.pincode ?? "");
-        setHospitalCategory(hospital?.hospitalCategory ?? "");
-        setRegistrationNumber(hospital?.registrationNumber ?? "");
-        setNoOfDoctors(hospital?.noOfDoctors ?? "");
-        setTotalBeds(hospital?.totalBeds ?? "");
-        setAvailableBeds(hospital?.availableBeds ?? "");
-        setTotalPatients(hospital?.totalPatients ?? "");
-        setAvailablePatients(hospital?.availablePatients ?? "");
-        setWorkingHours(hospital?.workingHours ?? "");
-        setStatus(hospital?.status ?? "");
-        setImage(hospital?.image ?? "");
-    };
-
-    return (
-        <div>
-            <header className="mb-8">
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Hospital Profile</h1>
-                <p className="text-slate-500 mt-1">Update your hospital's information. The preview card reflects every change live.</p>
-            </header>
-
-            {toast && (
-                <div className={`mb-6 flex items-center gap-3 px-5 py-3.5 rounded-xl border text-sm font-semibold shadow-sm ${toast.type === "success" ? "bg-teal-50 border-teal-200 text-teal-700" : "bg-rose-50 border-rose-200 text-rose-700"}`}>
-                    <span className="material-symbols-outlined text-base">{toast.type === "success" ? "check_circle" : "error"}</span>
-                    {toast.msg}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-                <div className="flex gap-8 items-start">
-
-                    {/* LEFT: Form */}
-                    <div className="flex-1 space-y-6 min-w-0">
-
-                        {/* Basic Info */}
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-                                <div className="size-8 rounded-lg bg-[#0a66c2]/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[#0a66c2] text-base">business</span>
-                                </div>
-                                <h2 className="text-sm font-bold text-slate-800">Basic Information</h2>
-                            </div>
-                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <FormField label="Hospital Name" id="name" value={name} onChange={(e) => setName(e.target.value)} icon="local_hospital" />
-                                <FormField label="Mobile Number" id="mobile" type="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} icon="phone" />
-                                <FormField label="Hospital Category" id="hospitalCategory" value={hospitalCategory} onChange={(e) => setHospitalCategory(e.target.value)} placeholder="e.g. General / Multi-specialty" icon="category" />
-                                <FormField label="Registration Number" id="registrationNumber" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} icon="badge" />
-                                <FormField label="Working Hours" id="workingHours" value={workingHours} onChange={(e) => setWorkingHours(e.target.value)} placeholder="e.g. 24/7 or 8am – 8pm" icon="schedule" />
-                                <div>
-                                    <label htmlFor="status" className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                                        <span className="material-symbols-outlined text-[14px] text-slate-400">circle</span>
-                                        Status
-                                    </label>
-                                    <select
-                                        id="status"
-                                        value={status}
-                                        onChange={(e) => setStatus(e.target.value)}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#0a66c2]/25 focus:border-[#0a66c2] transition-all shadow-sm"
-                                    >
-                                        <option value="">Select status</option>
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                        <option value="Under Maintenance">Under Maintenance</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Address */}
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-                                <div className="size-8 rounded-lg bg-[#0a66c2]/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[#0a66c2] text-base">location_on</span>
-                                </div>
-                                <h2 className="text-sm font-bold text-slate-800">Address</h2>
-                            </div>
-                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="md:col-span-2">
-                                    <FormField label="Street Address" id="address" value={address} onChange={(e) => setAddress(e.target.value)} icon="signpost" />
-                                </div>
-                                <FormField label="City" id="city" value={city} onChange={(e) => setCity(e.target.value)} icon="location_city" />
-                                <FormField label="State" id="state" value={state} onChange={(e) => setState(e.target.value)} icon="map" />
-                                <FormField label="Pincode" id="pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} icon="pin_drop" />
-                            </div>
-                        </div>
-
-                        {/* Operational Metrics */}
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-                                <div className="size-8 rounded-lg bg-[#0a66c2]/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[#0a66c2] text-base">analytics</span>
-                                </div>
-                                <h2 className="text-sm font-bold text-slate-800">Operational Metrics</h2>
-                            </div>
-                            <div className="p-6 grid grid-cols-2 md:grid-cols-3 gap-5">
-                                <FormField label="No. of Doctors" id="noOfDoctors" type="number" value={noOfDoctors} onChange={(e) => setNoOfDoctors(e.target.value)} icon="medical_services" />
-                                <FormField label="Total Beds" id="totalBeds" type="number" value={totalBeds} onChange={(e) => setTotalBeds(e.target.value)} icon="bed" />
-                                <FormField label="Available Beds" id="availableBeds" type="number" value={availableBeds} onChange={(e) => setAvailableBeds(e.target.value)} icon="airline_seat_flat" />
-                                <FormField label="Total Patients" id="totalPatients" type="number" value={totalPatients} onChange={(e) => setTotalPatients(e.target.value)} icon="patient_list" />
-                                <FormField label="Available Patients" id="availablePatients" type="number" value={availablePatients} onChange={(e) => setAvailablePatients(e.target.value)} icon="people" />
-                            </div>
-                        </div>
-
-                        {/* Image */}
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-                                <div className="size-8 rounded-lg bg-[#0a66c2]/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[#0a66c2] text-base">image</span>
-                                </div>
-                                <h2 className="text-sm font-bold text-slate-800">Hospital Image</h2>
-                            </div>
-                            <div className="p-6">
-                                <FormField label="Image URL" id="image" value={image} onChange={(e) => setImage(e.target.value)} placeholder="https://example.com/hospital.jpg" icon="link" />
-                                <p className="text-xs text-slate-400 mt-2">Paste a direct image URL — the preview card on the right updates instantly.</p>
-                            </div>
-                        </div>
-
-                        {/* Submit */}
-                        <div className="flex items-center justify-end gap-3 pb-8">
-                            <button type="button" onClick={handleReset} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all">
-                                Reset
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0a66c2] text-white text-sm font-bold hover:bg-[#0a66c2]/90 transition-all shadow-lg shadow-[#0a66c2]/25 disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {saving ? (
-                                    <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Saving…</>
-                                ) : (
-                                    <><span className="material-symbols-outlined text-sm">save</span>Save Changes</>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* RIGHT: Live preview */}
-                    <div className="w-80 flex-shrink-0">
-                        <HospitalPreviewCard
-                            name={name} mobile={mobile} address={address} city={city} state={state}
-                            pincode={pincode} hospitalCategory={hospitalCategory} registrationNumber={registrationNumber}
-                            noOfDoctors={noOfDoctors} totalBeds={totalBeds} availableBeds={availableBeds}
-                            totalPatients={totalPatients} workingHours={workingHours} status={status} image={image}
-                        />
-                    </div>
-                </div>
-            </form>
-        </div>
-    );
-}
 
 // ─── Main Dashboard Shell ───────────────────────────────────────────────────────
 export default function HospitalDashboard() {
     const [activeNav, setActiveNav] = useState("Dashboard");
-    const hospital = useSelector((state) => state.hospital?.hospitalData);
+    const hospital = useSelector((state) => state.user?.userData);
     const dispatch = useDispatch();
 
     const renderContent = () => {
         switch (activeNav) {
             case "Dashboard": return <DashboardView hospital={hospital} />;
+            case "Add Doctor": return <AddDoctor />;
             case "View Doctors": return <ViewDoctorsView />;
-            case "Hospital Profile": return <HospitalProfileView hospital={hospital} dispatch={dispatch} />;
+            case "Hospital Profile": return <HospitalProfileView />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center h-64 text-slate-400">
@@ -560,6 +366,13 @@ export default function HospitalDashboard() {
                 );
         }
     };
+
+    const handleLogout = async () => {
+
+        const res = await axios.post("http://localhost:3000/api/hospital/hospital-signout", {}, { withCredentials: true });
+        dispatch(setUserData(null));
+        console.log({ message: "Logout Success", data: res.data });
+    }
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#f5f7f8] text-slate-900 font-sans">
@@ -580,8 +393,8 @@ export default function HospitalDashboard() {
                             key={item.label}
                             onClick={() => setActiveNav(item.label)}
                             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all ${activeNav === item.label
-                                    ? "bg-[#0a66c2]/10 text-[#0a66c2] font-semibold shadow-sm"
-                                    : "text-slate-600 hover:bg-slate-50"
+                                ? "bg-[#0a66c2]/10 text-[#0a66c2] font-semibold shadow-sm"
+                                : "text-slate-600 hover:bg-slate-50"
                                 }`}
                         >
                             <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
@@ -596,15 +409,15 @@ export default function HospitalDashboard() {
                     <button
                         onClick={() => setActiveNav("Hospital Profile")}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all ${activeNav === "Hospital Profile"
-                                ? "bg-[#0a66c2]/10 text-[#0a66c2] font-semibold shadow-sm"
-                                : "text-slate-600 hover:bg-slate-50"
+                            ? "bg-[#0a66c2]/10 text-[#0a66c2] font-semibold shadow-sm"
+                            : "text-slate-600 hover:bg-slate-50"
                             }`}
                     >
                         <span className="material-symbols-outlined text-[20px]">edit_note</span>
                         <span>Hospital Profile</span>
                     </button>
 
-                    <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 transition-all text-sm">
+                    <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 transition-all text-sm" onClick={handleLogout}>
                         <span className="material-symbols-outlined text-[20px]">logout</span>
                         <span>Logout</span>
                     </button>

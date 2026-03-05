@@ -1,24 +1,33 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
 import PatientNavbar from "../components/PatientNavbar";
+import { setUserData } from "../redux/UserSlice";
+import { serverUrl } from "../App";
 
 const PatientProfile = () => {
   const { userData } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const [profileData, setProfileData] = useState({
-    fullName: userData?.fullName || "John Doe",
-    email: userData?.email || "john@example.com",
-    phone: "+1 (555) 000-0000",
-    age: "28",
-    bloodGroup: "O+",
-    weight: "72",
-    height: "178",
-    hasSugar: true,
-    sugarDetails: "HbA1c: 6.5%",
-    hasBP: false,
-    bpDetails: "",
-    address: "123 Health Ave, Medical District, NY",
+    fullName: userData?.fullName || "",
+    email: userData?.email || "",
+    phone: userData?.phone || "",
+    address: userData?.address || "",
+    city: userData?.city || "",
+    state: userData?.state || "",
+    pincode: userData?.pincode || "",
+    age: userData?.age || "",
+    bloodGroup: userData?.bloodGroup || "",
+    weight: userData?.weight || "",
+    height: userData?.height || "",
+    hasSugar: userData?.hasSugar || false,
+    sugarDetails: userData?.sugarDetails || "",
+    hasBP: userData?.hasBP || false,
+    bpDetails: userData?.bpDetails || "",
   });
 
   const handleToggleCondition = (condition) => {
@@ -37,27 +46,57 @@ const PatientProfile = () => {
     setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Logic to save to backend would go here
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      const res = await axios.put(
+        `${serverUrl}/api/auth/update-profile`,
+        {
+          fullName: profileData.fullName,
+          phone: profileData.phone,
+          address: profileData.address,
+          city: profileData.city,
+          state: profileData.state,
+          pincode: profileData.pincode,
+          bloodGroup: profileData.bloodGroup,
+          age: profileData.age,
+          weight: profileData.weight,
+          height: profileData.height,
+          hasSugar: profileData.hasSugar,
+          sugarDetails: profileData.sugarDetails,
+          hasBP: profileData.hasBP,
+          bpDetails: profileData.bpDetails,
+        },
+        { withCredentials: true },
+      );
+      dispatch(setUserData(res.data.user));
+      setIsEditing(false);
+    } catch (error) {
+      setSaveError(
+        error?.response?.data?.message || "Failed to save. Try again.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display antialiased">
+    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-manrope antialiased">
       <PatientNavbar />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-6 lg:px-10 py-10 space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-[32px] border border-primary/10 shadow-sm relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-primary/10 shadow-sm relative overflow-hidden">
           <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
             <div className="h-32 w-32 rounded-3xl bg-primary/10 flex items-center justify-center border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden">
               <span className="text-4xl font-black text-primary">
-                {profileData.fullName.charAt(0)}
+                {profileData.fullName.charAt(0).toUpperCase() || "?"}
               </span>
             </div>
             <div className="text-center md:text-left space-y-1">
-              <h1 className="text-3xl font-black italic tracking-tight">
-                {profileData.fullName}
+              <h1 className="text-3xl font-black tracking-tight">
+                {profileData.fullName || "Your Name"}
               </h1>
               <p className="text-slate-500 font-bold flex items-center justify-center md:justify-start gap-2">
                 <span className="material-symbols-outlined text-primary text-sm">
@@ -65,9 +104,10 @@ const PatientProfile = () => {
                 </span>
                 {profileData.email}
               </p>
-              <div className="flex gap-3 justify-center md:justify-start pt-2">
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start pt-2">
                 <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-primary/20">
-                  Patient ID: #CC-8829
+                  Patient ID: #
+                  {userData?._id?.slice(-5).toUpperCase() || "----"}
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20">
                   Verified Profile
@@ -76,19 +116,29 @@ const PatientProfile = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-            className={`px-8 py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 flex items-center gap-2 relative z-10 ${
-              isEditing
-                ? "bg-slate-900 text-white hover:bg-slate-800"
-                : "bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90"
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg">
-              {isEditing ? "save" : "edit_square"}
-            </span>
-            {isEditing ? "Save Changes" : "Edit Profile"}
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            {saveError && (
+              <p className="text-xs text-red-500 font-bold">{saveError}</p>
+            )}
+            <button
+              onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
+              disabled={isSaving}
+              className={`px-8 py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 flex items-center gap-2 relative z-10 disabled:opacity-60 ${
+                isEditing
+                  ? "bg-slate-900 text-white hover:bg-slate-800"
+                  : "bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90"
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">
+                {isSaving ? "sync" : isEditing ? "save" : "edit_square"}
+              </span>
+              {isSaving
+                ? "Saving..."
+                : isEditing
+                  ? "Save Changes"
+                  : "Edit Profile"}
+            </button>
+          </div>
 
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <span className="material-symbols-outlined text-[120px] rotate-12">
@@ -98,35 +148,35 @@ const PatientProfile = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Physical Metrics & Identity */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Medical Metrics Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 {
                   label: "Blood Group",
-                  value: profileData.bloodGroup,
+                  value: profileData.bloodGroup || "—",
                   icon: "water_drop",
                   color: "text-red-500",
                   name: "bloodGroup",
                 },
                 {
                   label: "Age",
-                  value: `${profileData.age} yr`,
+                  value: profileData.age ? `${profileData.age} yr` : "—",
                   icon: "event",
                   color: "text-blue-500",
                   name: "age",
                 },
                 {
                   label: "Weight",
-                  value: `${profileData.weight} kg`,
+                  value: profileData.weight ? `${profileData.weight} kg` : "—",
                   icon: "monitor_weight",
                   color: "text-emerald-500",
                   name: "weight",
                 },
                 {
                   label: "Height",
-                  value: `${profileData.height} cm`,
+                  value: profileData.height ? `${profileData.height} cm` : "—",
                   icon: "straighten",
                   color: "text-amber-500",
                   name: "height",
@@ -153,6 +203,7 @@ const PatientProfile = () => {
                         value={profileData[item.name]}
                         onChange={handleChange}
                         className="w-full bg-slate-50 dark:bg-slate-800 border-b border-primary/20 text-sm font-black outline-none py-1"
+                        placeholder={item.label}
                       />
                     ) : (
                       <p className="text-lg font-black">{item.value}</p>
@@ -162,15 +213,14 @@ const PatientProfile = () => {
               ))}
             </div>
 
-            {/* Detailed Info Form */}
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] border border-primary/5 shadow-sm space-y-8">
-              <h3 className="text-xl font-black italic flex items-center gap-3">
+            {/* Contact & Identity */}
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-primary/5 shadow-sm space-y-8">
+              <h3 className="text-xl font-black flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">
                   contact_page
                 </span>
-                Contact & Identity
+                Contact &amp; Identity
               </h3>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {[
                   {
@@ -184,6 +234,7 @@ const PatientProfile = () => {
                     value: profileData.email,
                     name: "email",
                     type: "email",
+                    readOnly: true,
                   },
                   {
                     label: "Phone Number",
@@ -192,9 +243,27 @@ const PatientProfile = () => {
                     type: "tel",
                   },
                   {
-                    label: "Permanent Address",
+                    label: "Address",
                     value: profileData.address,
                     name: "address",
+                    type: "text",
+                  },
+                  {
+                    label: "City",
+                    value: profileData.city,
+                    name: "city",
+                    type: "text",
+                  },
+                  {
+                    label: "State",
+                    value: profileData.state,
+                    name: "state",
+                    type: "text",
+                  },
+                  {
+                    label: "Pincode",
+                    value: profileData.pincode,
+                    name: "pincode",
                     type: "text",
                   },
                 ].map((field, idx) => (
@@ -202,7 +271,7 @@ const PatientProfile = () => {
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
                       {field.label}
                     </label>
-                    {isEditing ? (
+                    {isEditing && !field.readOnly ? (
                       <input
                         type={field.type}
                         name={field.name}
@@ -211,7 +280,9 @@ const PatientProfile = () => {
                         className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-primary/5 rounded-2xl py-3 px-4 text-sm font-bold focus:border-primary outline-none transition-all shadow-inner"
                       />
                     ) : (
-                      <p className="text-sm font-bold p-1">{field.value}</p>
+                      <p className="text-sm font-bold p-1 text-slate-700">
+                        {field.value || "—"}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -219,9 +290,9 @@ const PatientProfile = () => {
             </div>
           </div>
 
-          {/* Right Column: Chronic Conditions & Medical OP */}
+          {/* Right Column: Chronic Conditions */}
           <div className="lg:col-span-1 space-y-8">
-            <div className="bg-slate-900 text-white p-8 rounded-[40px] shadow-2xl space-y-8">
+            <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl space-y-8">
               <div className="flex items-center justify-between">
                 <h3 className="text-[10px] font-black uppercase tracking-[3px] text-slate-400">
                   Chronic Tracking
@@ -231,7 +302,7 @@ const PatientProfile = () => {
                 </span>
               </div>
 
-              {/* Sugar Tracking */}
+              {/* Sugar */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -249,6 +320,7 @@ const PatientProfile = () => {
                   </div>
                   {isEditing && (
                     <button
+                      type="button"
                       onClick={() => handleToggleCondition("hasSugar")}
                       className={`size-6 rounded-full border-2 flex items-center justify-center transition-all ${profileData.hasSugar ? "bg-primary border-primary" : "border-white/20"}`}
                     >
@@ -263,7 +335,7 @@ const PatientProfile = () => {
                 {profileData.hasSugar && (
                   <div className="pl-14 space-y-2">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-                      Current Levels / Quantity
+                      Current Levels
                     </label>
                     {isEditing ? (
                       <input
@@ -282,7 +354,7 @@ const PatientProfile = () => {
                 )}
               </div>
 
-              {/* BP Tracking */}
+              {/* BP */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -302,6 +374,7 @@ const PatientProfile = () => {
                   </div>
                   {isEditing && (
                     <button
+                      type="button"
                       onClick={() => handleToggleCondition("hasBP")}
                       className={`size-6 rounded-full border-2 flex items-center justify-center transition-all ${profileData.hasBP ? "bg-primary border-primary" : "border-white/20"}`}
                     >
@@ -316,7 +389,7 @@ const PatientProfile = () => {
                 {profileData.hasBP && (
                   <div className="pl-14 space-y-2">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-                      Current Reading / Quantity
+                      Current Reading
                     </label>
                     {isEditing ? (
                       <input
@@ -335,7 +408,7 @@ const PatientProfile = () => {
                 )}
               </div>
 
-              <div className="h-px bg-white/5 pt-4" />
+              <div className="h-px bg-white/5" />
 
               <div className="p-5 bg-white/5 rounded-3xl border border-white/5 space-y-3">
                 <div className="flex items-center gap-3">
