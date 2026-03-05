@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuthHeader from "../components/AuthHeader";
+import { setHospitalData } from "../redux/HospitalSlice";
+import { useDispatch } from "react-redux";
 
 // Defined OUTSIDE the parent component so React never treats it as a new
 // component type on re-renders — that would cause inputs to lose focus after
@@ -35,6 +37,7 @@ const Field = ({
 
 const HospitalSignUp = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Toggle between Sign Up and Sign In
   const [isSignIn, setIsSignIn] = useState(false);
@@ -95,6 +98,8 @@ const HospitalSignUp = () => {
           { registrationNumber, email, password },
           { withCredentials: true },
         );
+        console.log(response.data);
+        dispatch(setHospitalData(response.data.data));
         if (response.status === 200) {
           setSuccess("Signed in successfully! Redirecting...");
           setTimeout(() => navigate("/hospital-dashboard"), 1500);
@@ -106,6 +111,7 @@ const HospitalSignUp = () => {
           formData,
           { withCredentials: true },
         );
+        dispatch(setHospitalData(response.data.hospital));
         if (response.status === 201) {
           setSuccess("Hospital account created successfully!");
           setTimeout(() => navigate("/hospital-dashboard"), 1500);
@@ -114,7 +120,7 @@ const HospitalSignUp = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          `An error occurred during ${isSignIn ? "sign in" : "sign up"}.`,
+        `An error occurred during ${isSignIn ? "sign in" : "sign up"}.`,
       );
     } finally {
       setLoading(false);
@@ -189,22 +195,20 @@ const HospitalSignUp = () => {
                 <button
                   type="button"
                   onClick={() => !isSignIn || handleToggleMode()}
-                  className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${
-                    !isSignIn
+                  className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${!isSignIn
                       ? "border-blue-600 text-gray-800"
                       : "border-transparent text-gray-400 hover:text-gray-600"
-                  }`}
+                    }`}
                 >
                   Register
                 </button>
                 <button
                   type="button"
                   onClick={() => isSignIn || handleToggleMode()}
-                  className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${
-                    isSignIn
+                  className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${isSignIn
                       ? "border-blue-600 text-gray-800"
                       : "border-transparent text-gray-400 hover:text-gray-600"
-                  }`}
+                    }`}
                 >
                   Sign In
                 </button>

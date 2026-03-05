@@ -1,9 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { setUserData } from "../redux/UserSlice";
-import axios from "axios";
-import { serverUrl } from "../App";
+import React from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import PatientNavbar from "./PatientNavbar";
 
 const StatCard = ({ icon, label, value, subtext, colorClass, bgClass }) => (
   <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-primary/10 flex items-center gap-4 group hover:border-primary/30 transition-all shadow-sm">
@@ -26,13 +24,7 @@ const StatCard = ({ icon, label, value, subtext, colorClass, bgClass }) => (
   </div>
 );
 
-const AppointmentItem = ({
-  doctor,
-  specialty,
-  time,
-  image,
-  isCall = false,
-}) => (
+const AppointmentItem = ({ doctor, specialty, time, image }) => (
   <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-primary/10 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:shadow-md transition-all gap-4">
     <div className="flex items-center gap-3">
       <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-primary/10">
@@ -48,15 +40,12 @@ const AppointmentItem = ({
       </div>
     </div>
     <div className="flex gap-2 w-full sm:w-auto">
-      {isCall ? (
-        <button className="flex-1 sm:flex-none px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-          Join Call
-        </button>
-      ) : (
-        <button className="flex-1 sm:flex-none px-4 py-2 bg-primary/5 hover:bg-primary/10 text-primary rounded-lg text-xs font-bold transition-colors">
-          Reschedule
-        </button>
-      )}
+      <button className="flex-1 sm:flex-none px-4 py-2 bg-primary/5 hover:bg-primary/10 text-primary rounded-lg text-xs font-bold transition-colors">
+        View Directions
+      </button>
+      <button className="flex-1 sm:flex-none px-4 py-2 bg-primary/5 hover:bg-primary/10 text-primary rounded-lg text-xs font-bold transition-colors">
+        Reschedule
+      </button>
     </div>
   </div>
 );
@@ -77,47 +66,8 @@ const HealthStat = ({ label, value, percentage, colorClass }) => (
 );
 
 const PatientHome = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
   const { userData } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        `${serverUrl}/api/auth/patient-logout`,
-        {},
-        { withCredentials: true },
-      );
-      dispatch(setUserData(null));
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Fallback: clear state even if server logout fails
-      dispatch(setUserData(null));
-      navigate("/");
-    }
-  };
-
-  const navLinks = [
-    { label: "Dashboard", path: "/home", icon: "grid_view" },
-    { label: "AI Predictor", path: "#", icon: "neurology" },
-    { label: "Hospitals", path: "#", icon: "local_hospital" },
-    { label: "Appointments", path: "#", icon: "calendar_month" },
-  ];
 
   const stats = [
     {
@@ -185,136 +135,9 @@ const PatientHome = () => {
     },
   ];
 
-  const userInitial = userData?.fullName?.charAt(0).toUpperCase() || "U";
-
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col overflow-x-hidden font-display">
-      {/* Refactored Header */}
-      <header className="sticky top-0 z-[60] w-full border-b border-primary/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-10 py-3">
-          <Link
-            to="/"
-            className="flex items-center gap-3 text-primary group shrink-0"
-          >
-            <span className="material-symbols-outlined text-3xl group-hover:rotate-12 transition-transform">
-              medical_services
-            </span>
-            <h2 className="text-slate-900 dark:text-slate-100 text-xl font-extrabold tracking-tight">
-              CareConnect
-            </h2>
-          </Link>
-
-          <div className="flex items-center gap-6 lg:gap-10">
-            {/* Desktop Navigation Links - Now on the Right */}
-            <nav className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.path}
-                  className="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-primary transition-all py-1.5"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-4 relative" ref={dropdownRef}>
-              <div className="text-right hidden sm:flex flex-col justify-center border-l border-primary/10 pl-4 lg:pl-6">
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">
-                  {userData?.fullName || "User"}
-                </p>
-                <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">
-                  `#`{userData?._id?.slice(-4) || "0000"}
-                </p>
-              </div>
-
-              {/* User Initial Avatar with Dropdown Trigger */}
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="size-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all outline-none border-2 border-white dark:border-slate-800"
-              >
-                {userInitial}
-              </button>
-
-              {/* Profile Dropdown */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-primary/10 py-2 animate-in fade-in zoom-in-95 duration-150">
-                  <Link
-                    to="#"
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-primary/5 hover:text-primary"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    <span className="material-symbols-outlined text-xl">
-                      person
-                    </span>
-                    My Profile
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-xl">
-                      logout
-                    </span>
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden flex items-center justify-center size-10 rounded-lg hover:bg-primary/5 text-slate-600 transition-colors"
-            >
-              <span className="material-symbols-outlined">
-                {isMenuOpen ? "close" : "menu"}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Dropdown */}
-        {isMenuOpen && (
-          <div className="lg:hidden border-t border-primary/5 bg-white dark:bg-slate-900 py-4 px-6 animate-in slide-in-from-top-2 duration-200">
-            <nav className="flex flex-col gap-2">
-              {navLinks.map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.path}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-primary/5 hover:text-primary transition-all font-bold"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    {link.icon}
-                  </span>
-                  {link.label}
-                </a>
-              ))}
-              {/* Add Profile and Logout to Mobile Menu too for consistency */}
-              <div className="h-px bg-slate-100 dark:bg-slate-800 my-2" />
-              <Link
-                to="#"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-primary/5 hover:text-primary font-bold"
-              >
-                <span className="material-symbols-outlined text-xl">
-                  person
-                </span>
-                Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 font-bold text-left"
-              >
-                <span className="material-symbols-outlined text-xl">
-                  logout
-                </span>
-                Logout
-              </button>
-            </nav>
-          </div>
-        )}
-      </header>
+      <PatientNavbar />
 
       {/* Main Content Area - Full Width */}
       <main className="mx-auto w-full max-w-7xl px-6 lg:px-10 py-8 space-y-8">
@@ -333,7 +156,10 @@ const PatientHome = () => {
                 symptoms instantly and get verified health insights.
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-                <button className="w-full sm:w-auto bg-white text-primary px-10 py-4 rounded-xl text-base font-black hover:bg-slate-50 hover:scale-[1.02] shadow-2xl transition-all active:scale-[0.98]">
+                <button
+                  onClick={() => navigate("/ai-symptom-checker")}
+                  className="w-full sm:w-auto bg-white text-primary px-10 py-4 rounded-xl text-base font-black hover:bg-slate-50 hover:scale-[1.02] shadow-2xl transition-all active:scale-[0.98]"
+                >
                   Start Assessment
                 </button>
                 <div className="flex items-center gap-3">
@@ -347,7 +173,7 @@ const PatientHome = () => {
                 </div>
               </div>
             </div>
-            <div className="shrink-0 hidden lg:block">
+            <div onClick={()=>navigate("/hospitals")} className="shrink-0 hidden lg:block">
               <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 border border-white/20 transition-all hover:translate-y-[-2px]">
                 <span className="material-symbols-outlined size-6 flex items-center justify-center bg-white text-primary rounded-full text-sm">
                   add

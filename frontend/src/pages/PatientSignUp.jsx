@@ -4,6 +4,8 @@ import { serverUrl } from "../App";
 import AuthHeader from "../components/AuthHeader";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/UserSlice";
+
+
 const PatientSignUp = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({

@@ -61,4 +61,36 @@ const hospitalSignOut = async (req, res) => {
     }
 }
 
-module.exports = { hospitalSignUp, hospitalSignIn, hospitalSignOut }
+const hospitalUpdate = async (req, res) => {
+    try {
+        const token = req.cookies?.token
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized" })
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const allowedFields = [
+            "name", "mobile", "address", "city", "state", "pincode",
+            "hospitalCategory", "registrationNumber", "noOfDoctors",
+            "totalBeds", "availableBeds", "totalPatients", "availablePatients",
+            "workingHours", "status", "image"
+        ]
+        const updateData = {}
+        allowedFields.forEach((field) => {
+            if (req.body[field] !== undefined) updateData[field] = req.body[field]
+        })
+        const updatedHospital = await Hospital.findByIdAndUpdate(
+            decoded.userId,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        ).select("-password")
+        if (!updatedHospital) {
+            return res.status(404).json({ message: "Hospital not found" })
+        }
+        return res.status(200).json({ message: "Hospital updated successfully", data: updatedHospital })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal server error" })
+    }
+}
+
+module.exports = { hospitalSignUp, hospitalSignIn, hospitalSignOut, hospitalUpdate }
